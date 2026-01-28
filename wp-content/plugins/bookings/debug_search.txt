@@ -1,0 +1,9 @@
+Search SQL: SELECT booking.*, 
+            first_name.meta_value AS first_name,
+            last_name.meta_value AS last_name
+            FROM wp_booking_data AS booking 
+            LEFT JOIN wp_users AS users ON CAST(JSON_UNQUOTE(JSON_EXTRACT(booking.booking_details, '$.member')) AS UNSIGNED) = users.ID 
+            LEFT JOIN wp_usermeta AS first_name ON (users.ID = first_name.user_id AND first_name.meta_key = 'first_name')
+            LEFT JOIN wp_usermeta AS last_name ON (users.ID = last_name.user_id AND last_name.meta_key = 'last_name')
+            WHERE users.ID IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(booking.booking_details, '$.member')) IN (1) AND JSON_UNQUOTE(JSON_EXTRACT(booking.booking_details, '$.status')) != '4'
+Num Results: 1

@@ -1,0 +1,105 @@
+[27-Mar-2024 12:30:03 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-27%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[27-Mar-2024 14:02:59 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-28%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[27-Mar-2024 14:03:02 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-29%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[27-Mar-2024 14:03:17 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-29%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[27-Mar-2024 14:03:20 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[27-Mar-2024 14:03:44 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-31%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 01:16:25 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 01:17:24 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 01:17:39 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 01:17:56 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 01:31:59 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1' AND bd.user_id = 5
+[30-Mar-2024 02:12:57 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1' AND bd.user_id = 5
+[30-Mar-2024 02:12:57 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1' AND bd.user_id = 5
+[30-Mar-2024 02:32:27 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 02:33:02 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 02:50:10 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 02:56:49 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-04-01%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 08:22:17 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-04-01%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 08:37:17 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 08:37:33 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-03-30%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
+[30-Mar-2024 08:37:55 America/Toronto] WordPress database error Unknown column 'u.is_delete' in 'field list' for query SELECT bd.*, u.user_nicename, u.is_delete
+          FROM wp_booking_data bd
+          LEFT JOIN wp_users u ON bd.user_id = u.ID
+          WHERE bd.booking_details LIKE '%\"datePicker\":\"%2024-04-01%\"%'
+          AND JSON_EXTRACT(bd.booking_details, '$.status') = '1'
