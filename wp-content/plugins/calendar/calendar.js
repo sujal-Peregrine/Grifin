@@ -243,7 +243,7 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
                 var dateStr = dateStr.split('T')[0] + 'T00:00:00.000Z';
     
                 var hostUrl = window.location.origin;
-                var apiUrl = hostUrl+griffth+'/wp-content/plugins/calendar/get_available_spaces.php';
+                var apiUrl = ajax_object.site_url + '/wp-content/plugins/calendar/get_available_spaces.php';
     
                 // fetch(apiUrl, {
                 //     method: 'POST',
@@ -336,7 +336,7 @@ function viewBookings(info) {
     var dateStr = info.dateStr;
     
     var hostUrl = window.location.origin;
-    var apiUrl = hostUrl +griffth+ '/wp-content/plugins/calendar/get_booking_data.php';
+    var apiUrl = ajax_object.site_url + '/wp-content/plugins/calendar/get_booking_data.php';
 
     var hiddenNameValue = document.getElementById('hidden_name').value;
 
@@ -376,7 +376,7 @@ function viewBookings(info) {
 
 function viewAvailableSpaces(info, dateStr) {
     var hostUrl = window.location.origin;
-    var apiUrl = hostUrl +griffth+ '/wp-content/plugins/calendar/get_available_spaces.php';
+    var apiUrl = ajax_object.site_url + '/wp-content/plugins/calendar/get_available_spaces.php';
 
 
     fetch(apiUrl, {
@@ -523,7 +523,7 @@ function fetchMyAvailSpace() {
     var monthName = date.toLocaleString('en-US', { month: 'long' });
     var year = date.getFullYear(); 
     var hostUrl = window.location.origin;
-    var apiUrl = hostUrl +griffth+ '/wp-content/plugins/calendar/get_avail_space.php';
+    var apiUrl = ajax_object.site_url + '/wp-content/plugins/calendar/get_avail_space.php';
 
     return new Promise((resolve, reject) => {
         fetch(apiUrl, {
@@ -568,7 +568,7 @@ function fetchMyCalendarTitle() {
     var monthName = date.toLocaleString('en-US', { month: 'long' });
     var year = date.getFullYear(); 
     var hostUrl = window.location.origin;
-                var apiUrl = hostUrl +griffth+'/wp-content/plugins/calendar/get_my_calendar_title.php';
+                var apiUrl = ajax_object.site_url + '/wp-content/plugins/calendar/get_my_calendar_title.php';
 
     fetch(apiUrl, {
                     method: 'POST',

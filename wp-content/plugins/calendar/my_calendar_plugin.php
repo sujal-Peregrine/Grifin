@@ -46,6 +46,7 @@ function enqueue_fullcalendar_scripts()
         'ajax_object',
         array(
             'ajax_url' => admin_url('admin-ajax.php'),
+            'site_url' => get_site_url(),
         )
     );
     wp_enqueue_script('toastr-js', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js', array('jquery'), '', true);
@@ -1777,6 +1778,7 @@ function my_calendar_events_page()
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="deleteEvent">Delete Event</button>
                     <button type="button" class="btn btn-primary" id="saveEventChanges">Save Changes</button>
                 </div>
             </div>
@@ -1876,6 +1878,44 @@ function my_calendar_events_page()
                     error: function (error) {
                         console.error('Error updating event:', error);
 
+                    }
+                });
+            });
+
+            $('#deleteEvent').on('click', function () {
+                var eventId = $('#eventDetailsId').val();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: 'POST',
+                            url: ajaxurl,
+                            data: {
+                                action: 'delete_event',
+                                eventId: eventId,
+                                nonce: '<?php echo wp_create_nonce('delete_the_event'); ?>'
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Your event has been deleted.',
+                                        'success'
+                                    ).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Error', response.data, 'error');
+                                }
+                            }
+                        });
                     }
                 });
             });
@@ -2561,18 +2601,42 @@ function update_event_callback()
         } else {
             wp_send_json_error('No events found');
         }
-
-        wp_send_json_success('Event updated successfully');
     } else {
         // Send error response for invalid action
         wp_send_json_error('Invalid action');
     }
 }
-
-// Hook the update_event function to WordPress AJAX action
 add_action('wp_ajax_update_event', 'update_event_callback');
 
+function delete_event_callback() {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'delete_the_event')) {
+        wp_send_json_error('Unauthorized request');
+    }
 
+    $event_id = sanitize_text_field($_POST['eventId']);
+    $user_id = get_current_user_id();
+    $existing_record = get_user_meta($user_id, 'my_calendar_events_data', true);
+
+    if (!empty($existing_record) && is_array($existing_record)) {
+        $found = false;
+        foreach ($existing_record as $key => $event) {
+            if ($event['event_id'] === $event_id) {
+                unset($existing_record[$key]);
+                $found = true;
+                break;
+            }
+        }
+        if ($found) {
+            update_user_meta($user_id, 'my_calendar_events_data', array_values($existing_record));
+            wp_send_json_success('Event deleted successfully');
+        } else {
+            wp_send_json_error('Event not found');
+        }
+    } else {
+        wp_send_json_error('No events found');
+    }
+}
+add_action('wp_ajax_delete_event', 'delete_event_callback');
 
 
 add_action('wp_ajax_delete_calendar_entry', 'delete_calendar_entry');
@@ -2927,7 +2991,10 @@ function my_calendar_available_spaces_page()
     
     <script>
         jQuery(document).ready(function ($) {
-            flatpickr('#my_calendar_date', {});
+            flatpickr('#my_calendar_date', {
+                mode: 'range',
+                dateFormat: 'Y-m-d'
+            });
             var table = $('#myCalendarDataTable').DataTable({
                 order: [[0, 'desc']],
                 columnDefs: [{
@@ -3130,23 +3197,42 @@ function save_available_spaces_callback()
     check_ajax_referer('my_calendar_nonce', 'nonce');
     $data = wp_unslash($_POST['data']);
     parse_str($data, $parsed_data);
-    $my_calendar_date = sanitize_text_field($parsed_data['my_calendar_date']);
+    $my_calendar_date_range = sanitize_text_field($parsed_data['my_calendar_date']);
     $available_spaces = intval($parsed_data['available_spaces']);
     global $wpdb;
     $table_name = $wpdb->prefix . 'available_spaces';
-    $existing_entry = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d AND my_calendar_date = %s", get_current_user_id(), $my_calendar_date));
-    if ($existing_entry) {
-        $wpdb->update($table_name, array('available_spaces' => $available_spaces, 'updated_at' => current_time('mysql', 1)), array('id' => $existing_entry->id), array('%d', '%s'), array('%d'));
-        wp_send_json_success(array('message' => 'Data updated successfully'));
-    } else {
-        $wpdb->insert($table_name, array('user_id' => get_current_user_id(), 'my_calendar_date' => $my_calendar_date, 'available_spaces' => $available_spaces, 'created_at' => current_time('mysql', 1), 'updated_at' => current_time('mysql', 1)), array('%d', '%s', '%d', '%s', '%s'));
-        if ($wpdb->insert_id) {
-            wp_send_json_success(array('message' => 'Data saved successfully'));
-        } else {
-            wp_send_json_error(array('message' => 'Failed to save data'));
+    $user_id = get_current_user_id();
+
+    // Handle range
+    if (strpos($my_calendar_date_range, ' to ') !== false) {
+        list($start_date_str, $end_date_str) = explode(' to ', $my_calendar_date_range);
+        $start_date = new DateTime($start_date_str);
+        $end_date = new DateTime($end_date_str);
+        $end_date->modify('+1 day');
+
+        $interval = new DateInterval('P1D');
+        $date_range = new DatePeriod($start_date, $interval, $end_date);
+
+        foreach ($date_range as $date) {
+            $formatted_date = $date->format('Y-m-d');
+            save_or_update_availability($table_name, $user_id, $formatted_date, $available_spaces);
         }
+    } else {
+        save_or_update_availability($table_name, $user_id, $my_calendar_date_range, $available_spaces);
+    }
+    wp_send_json_success(array('message' => 'Data processed successfully'));
+}
+
+function save_or_update_availability($table_name, $user_id, $date, $spaces) {
+    global $wpdb;
+    $existing_entry = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d AND my_calendar_date = %s", $user_id, $date));
+    if ($existing_entry) {
+        $wpdb->update($table_name, array('available_spaces' => $spaces, 'updated_at' => current_time('mysql', 1)), array('id' => $existing_entry->id), array('%d', '%s'), array('%d'));
+    } else {
+        $wpdb->insert($table_name, array('user_id' => $user_id, 'my_calendar_date' => $date, 'available_spaces' => $spaces, 'created_at' => current_time('mysql', 1), 'updated_at' => current_time('mysql', 1)), array('%d', '%s', '%d', '%s', '%s'));
     }
 }
+
 add_action('wp_ajax_save_available_spaces', 'save_available_spaces_callback');
 function get_available_spaces_callback()
 {
