@@ -61,6 +61,45 @@ var defaultEvents = JSON.parse(defaultEventsField.value);
 
 
 
+
+// Helper to check hunt season restriction
+function isRestrictedDate(dateToCheck) {
+    // Both start and booking open date MUST be set
+    if (!ajax_object.hunt_start || !ajax_object.booking_open) {
+        return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const openDate = new Date(ajax_object.booking_open + 'T00:00:00');
+    
+    // Strict Rule 1: If today < Booking Open Date, EVERYTHING is restricted (closed).
+    if (today < openDate) {
+        return true;
+    }
+
+    // Strict Rule 2: If bookings are open, ONLY dates within [HuntStart, HuntEnd] are allowed.
+    // If huntEnd is not set, allow everything from huntStart onwards.
+    const huntStart = new Date(ajax_object.hunt_start + 'T00:00:00');
+    const huntEnd = ajax_object.hunt_end ? new Date(ajax_object.hunt_end + 'T00:00:00') : null;
+    
+    const checkDate = new Date(dateToCheck);
+    checkDate.setHours(0, 0, 0, 0);
+
+    // RESTRICT if date is BEFORE start
+    if (checkDate < huntStart) {
+        return true;
+    }
+
+    // RESTRICT if date is AFTER end (only if huntEnd is set)
+    if (huntEnd && checkDate > huntEnd) {
+        return true;
+    }
+
+    return false;
+}
+
 var myButton = document.getElementById("my-button");
 var waitlist = document.getElementById("my-button-waitlist");
 myButton.addEventListener("click", addNewEvent);
@@ -72,12 +111,23 @@ var bookingImg = document.getElementById('booking_img');
 function addNewEvent(info) {
     var currentDate = new Date();
     var currentDateString = currentDate.toISOString().split('T')[0];
+    
+    // Configure defaultDate if provided
+    let defaultDateVal = info && info.dateStr ? [info.dateStr] : [];
+
     flatpickr(datePicker, {
         mode: 'range',
-        defaultDate: [info.dateStr],
+        defaultDate: defaultDateVal,
         minDate: currentDateString, // Set the minimum date
-
-
+        disable: [
+            function(date) {
+                // Return true to disable
+                return isRestrictedDate(date);
+            }
+        ],
+        onChange: function(selectedDates, dateStr, instance) {
+             // Optional: Additional validation if needed
+        }
     });
     var modalInstance = bootstrap.Modal.getInstance(modal);
     if (!modalInstance) {
@@ -299,8 +349,11 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
     
     
                 // Check if the date is in the future, then add the "Book Now" button
+                // Also check if the date is NOT restricted by hunt season rules
                 if (cellDate >= currentDate) {
-                    info.el.appendChild(addButton);
+                    if (!isRestrictedDate(cellDate)) {
+                        info.el.appendChild(addButton);
+                    }
                     info.el.appendChild(content);
                 }
                 info.el.appendChild(viewButton);

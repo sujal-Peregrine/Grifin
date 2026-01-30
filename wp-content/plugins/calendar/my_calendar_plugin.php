@@ -25,6 +25,115 @@ function create_available_spaces_table()
 create_available_spaces_table();
 register_activation_hook(__FILE__, 'create_booking_table');
 register_activation_hook(__FILE__, 'create_waitlist_table');
+
+
+// Register Admin Menu
+function my_calendar_register_hunt_settings() {
+    add_option('hunt_season_start_date', '');
+    add_option('hunt_season_end_date', '');
+    add_option('hunt_season_booking_open_date', '');
+    register_setting('my_calendar_hunt_options_group', 'hunt_season_start_date', array(
+        'sanitize_callback' => 'my_calendar_validate_hunt_start_date'
+    ));
+    register_setting('my_calendar_hunt_options_group', 'hunt_season_end_date', array(
+        'sanitize_callback' => 'my_calendar_validate_hunt_end_date'
+    ));
+    register_setting('my_calendar_hunt_options_group', 'hunt_season_booking_open_date', array(
+        'sanitize_callback' => 'my_calendar_validate_booking_open_date'
+    ));
+}
+
+function my_calendar_validate_hunt_start_date($input) {
+    if (empty($input)) {
+        add_settings_error('hunt_season_start_date', 'required_error', 'Hunt Season Start Date is required.', 'error');
+        return get_option('hunt_season_start_date');
+    }
+    $today = date('Y-m-d');
+    if ($input < $today) {
+        add_settings_error('hunt_season_start_date', 'date_error', 'Hunt Season Start Date cannot be in the past.', 'error');
+        return get_option('hunt_season_start_date');
+    }
+    return $input;
+}
+
+function my_calendar_validate_hunt_end_date($input) {
+    if (empty($input)) return $input;
+    $start_date = $_POST['hunt_season_start_date'] ?? get_option('hunt_season_start_date');
+    if ($start_date && $input < $start_date) {
+        add_settings_error('hunt_season_end_date', 'date_error', 'Hunt Season End Date cannot be before the start date.', 'error');
+        return get_option('hunt_season_end_date');
+    }
+    return $input;
+}
+
+function my_calendar_validate_booking_open_date($input) {
+    if (empty($input)) {
+        add_settings_error('hunt_season_booking_open_date', 'required_error', 'Booking Open Date is required.', 'error');
+        return get_option('hunt_season_booking_open_date');
+    }
+    $today = date('Y-m-d');
+    $start_date = $_POST['hunt_season_start_date'] ?? get_option('hunt_season_start_date');
+    
+    if ($input < $today) {
+        add_settings_error('hunt_season_booking_open_date', 'date_error', 'Booking Open Date cannot be in the past.', 'error');
+        return get_option('hunt_season_booking_open_date');
+    }
+    if ($start_date && $input > $start_date) {
+        add_settings_error('hunt_season_booking_open_date', 'date_error', 'Booking Open Date cannot be after the hunt season start date.', 'error');
+        return get_option('hunt_season_booking_open_date');
+    }
+    return $input;
+}
+add_action('admin_init', 'my_calendar_register_hunt_settings');
+
+function my_calendar_register_options_page() {
+    add_menu_page('Calendar Settings', 'Calendar Settings', 'manage_options', 'my_calendar', 'my_calendar_options_page');
+}
+add_action('admin_menu', 'my_calendar_register_options_page');
+
+function my_calendar_options_page() {
+    $today = date('Y-m-d');
+    $start_date = get_option('hunt_season_start_date');
+    ?>
+    <div>
+        <h2>Calendar Settings</h2>
+        <form method="post" action="options.php">
+            <?php settings_fields('my_calendar_hunt_options_group'); ?>
+            <table>
+                <tr valign="top">
+                    <th scope="row"><label for="hunt_season_start_date">Hunt Season Start Date <span style="color:red;">*</span></label></th>
+                    <td><input type="date" id="hunt_season_start_date" name="hunt_season_start_date" min="<?php echo $today; ?>" value="<?php echo $start_date; ?>" required /></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row"><label for="hunt_season_end_date">Hunt Season End Date</label></th>
+                    <td><input type="date" id="hunt_season_end_date" name="hunt_season_end_date" min="<?php echo $start_date ? $start_date : $today; ?>" value="<?php echo get_option('hunt_season_end_date'); ?>" /></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row"><label for="hunt_season_booking_open_date">Booking Open Date (for Hunt Season) <span style="color:red;">*</span></label></th>
+                    <td><input type="date" id="hunt_season_booking_open_date" name="hunt_season_booking_open_date" min="<?php echo $today; ?>" max="<?php echo $start_date; ?>" value="<?php echo get_option('hunt_season_booking_open_date'); ?>" required /></td>
+                </tr>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var startDateInput = document.getElementById('hunt_season_start_date');
+            var endDateInput = document.getElementById('hunt_season_end_date');
+            var openDateInput = document.getElementById('hunt_season_booking_open_date');
+
+            startDateInput.addEventListener('change', function() {
+                var selectedStart = this.value;
+                if (selectedStart) {
+                    endDateInput.min = selectedStart;
+                    openDateInput.max = selectedStart;
+                }
+            });
+        });
+    </script>
+    <?php
+}
+
 function enqueue_fullcalendar_scripts()
 {
     wp_enqueue_style('app-css', plugin_dir_url(__FILE__) . '/app.css');
@@ -47,6 +156,9 @@ function enqueue_fullcalendar_scripts()
         array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'site_url' => get_site_url(),
+            'hunt_start' => get_option('hunt_season_start_date'),
+            'hunt_end' => get_option('hunt_season_end_date'),
+            'booking_open' => get_option('hunt_season_booking_open_date'),
         )
     );
     wp_enqueue_script('toastr-js', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js', array('jquery'), '', true);
@@ -364,6 +476,29 @@ function my_calendar_shortcode($atts)
                     <hr>
                     <div class="modal-body pt-0 booking">
                         <div class="container">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <?php
+                                        $hunt_start = get_option('hunt_season_start_date');
+                                        $hunt_end = get_option('hunt_season_end_date');
+                                        $booking_open = get_option('hunt_season_booking_open_date');
+
+                                        if ($hunt_start && $booking_open) {
+                                            $formatted_start = date('F j, Y', strtotime($hunt_start));
+                                            $formatted_open = date('F j, Y', strtotime($booking_open));
+                                            $formatted_end = $hunt_end ? date('F j, Y', strtotime($hunt_end)) : 'No specific date';
+                                            
+                                            echo "<strong>Hunt Season Start Date:</strong> $formatted_start <br>";
+                                            echo "<strong>Hunt Season End Date:</strong> $formatted_end <br>";
+                                            echo "<strong>Booking Opens:</strong> $formatted_open";
+                                        } else {
+                                            echo "<strong>Note:</strong> There is no upcoming hunt season at this time.";
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-md-6 border">
                                     <table class="table">
@@ -2599,6 +2734,35 @@ function save_booking_data()
         }
         $date_range_array[] = $end_date->format('Y-m-d');
         $date_range_array = array_unique($date_range_array);
+
+        // --- HUNT SEASON RESTRICTION CHECK ---
+        $hunt_start = get_option('hunt_season_start_date');
+        $hunt_end = get_option('hunt_season_end_date');
+        $booking_open = get_option('hunt_season_booking_open_date');
+
+        if ($hunt_start && $hunt_end && $booking_open) {
+            $today = current_time('Y-m-d');
+            
+            // Strict Rule 1: If today < Booking Open Date, EVERYTHING is restricted (closed).
+            if ($today < $booking_open) {
+                wp_send_json_error('Booking for Hunt Season is not open yet. Please wait until ' . date('F j, Y', strtotime($booking_open)));
+                wp_die();
+            }
+
+            // Strict Rule 2: If bookings are open, ONLY dates within [HuntStart, HuntEnd] are allowed.
+            $hunt_start_res = new DateTime($hunt_start);
+            $hunt_end_res = new DateTime($hunt_end);
+            
+            foreach ($date_range_array as $date_str) {
+                $date_obj = new DateTime($date_str);
+                // IF date is BEFORE start OR date is AFTER end -> ERROR
+                if ($date_obj < $hunt_start_res || $date_obj > $hunt_end_res) {
+                     wp_send_json_error('Bookings are only allowed during the Hunt Season (' . $hunt_start . ' to ' . $hunt_end . ').');
+                     wp_die();
+                }
+            }
+        }
+        // -------------------------------------
 
         $date_range_array = array_values($date_range_array);
 
