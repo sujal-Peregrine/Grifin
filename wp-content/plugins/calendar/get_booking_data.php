@@ -24,8 +24,9 @@ $query = "SELECT bd.*, u.user_nicename, u.is_delete
 // Check if user is logged in and if their ID is not 1
 $user_id = get_current_user_id();
 if ($user_id !== 1) {
-    $query .= $wpdb->prepare(" AND bd.user_id = %d", $user_id);
+    $query .= $wpdb->prepare(" AND JSON_UNQUOTE(JSON_EXTRACT(bd.booking_details, '$.member')) = %d", $user_id);
 }
+//$user_id = get_current_user_id();
 
 $query = $wpdb->prepare(
     $query,

@@ -1146,149 +1146,15 @@ var endDate = dateRange[1] ? new Date(dateRange[1]) : new Date(startDate); // Us
 
                 // Function to handle the click event for the next button
                 $('.fc-next-button').click(function () {
-                    var searchValue = $('#user-search-input').val();
-                    if (searchValue !== '') {
-                        var waitlistData = {
-                            action: 'fetch_bookings',
-                            search_value: searchValue
-                        };
-                        var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
-
-                        jQuery.ajax({
-                            type: 'POST',
-                            url: ajaxurl,
-                            data: waitlistData,
-                            success: function (response) {
-                                console.log(response);
-
-
-
-                                if (response != 0) {
-                                    var bookings = response.split('}{');
-                                    if (bookings.length > 1) {
-                                        bookings[0] += '}';
-                                        for (var i = 1; i < bookings.length - 1; i++) {
-                                            bookings[i] = '{' + bookings[i] + '}';
-                                        }
-                                        bookings[bookings.length - 1] = '{' + bookings[bookings.length - 1];
-                                    }
-
-                                    var uniqueDates = [];
-                                    var hasSetMember = false; // Flag to check if member has been set
-
-                                    bookings.forEach(function (booking) {
-                                        var bookingDetails = JSON.parse(booking);
-                                        console.log(bookingDetails.member)
-                                        if (!hasSetMember) {
-                                            $('#hidden_name').val(bookingDetails.member);
-                                            hasSetMember = true; // Update the flag
-                                        }
-
-                                        var datePicker = bookingDetails.datePicker.split(',');
-                                        datePicker.forEach(function (date) {
-                                            if (!uniqueDates.includes(date)) {
-                                                uniqueDates.push(date);
-                                            }
-                                        });
-                                    });
-
-                                    // Hide the "Booked Members" link for all .fc-day elements
-                                    $('.fc-day').find('.view-bookings-button').hide();
-
-                                    // Show the "Booked Members" link only for uniqueDates
-                                    uniqueDates.forEach(function (date) {
-                                        $('.fc-day[data-date="' + date + '"]').find('.view-bookings-button').show();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: 'Bookings',
-                                        text: 'Sorry, No Bookings for this user.',
-                                        icon: 'info',
-                                        confirmButtonText: 'OK'
-                                    });
-                                }
-                            },
-                            error: function (xhr, status, error) {
-                                console.error(xhr.responseText);
-                            }
-                        });
-                    }
+                    // Reuse the search logic
+                    $('#button-addon2').click();
                 });
 
                 // Function to handle the click event for the previous button
                 $('.fc-prev-button').click(function () {
-                    var searchValue = $('#user-search-input').val();
-                    if (searchValue !== '') {
-                        var waitlistData = {
-                            action: 'fetch_bookings',
-                            search_value: searchValue
-                        };
-                        var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
-
-                        jQuery.ajax({
-                            type: 'POST',
-                            url: ajaxurl,
-                            data: waitlistData,
-                            success: function (response) {
-                                console.log(response);
-
-
-
-                                if (response != 0) {
-                                    var bookings = response.split('}{');
-                                    if (bookings.length > 1) {
-                                        bookings[0] += '}';
-                                        for (var i = 1; i < bookings.length - 1; i++) {
-                                            bookings[i] = '{' + bookings[i] + '}';
-                                        }
-                                        bookings[bookings.length - 1] = '{' + bookings[bookings.length - 1];
-                                    }
-
-                                    var uniqueDates = [];
-                                    var hasSetMember = false; // Flag to check if member has been set
-
-                                    bookings.forEach(function (booking) {
-                                        var bookingDetails = JSON.parse(booking);
-                                        console.log(bookingDetails.member)
-                                        if (!hasSetMember) {
-                                            $('#hidden_name').val(bookingDetails.member);
-                                            hasSetMember = true; // Update the flag
-                                        }
-
-                                        var datePicker = bookingDetails.datePicker.split(',');
-                                        datePicker.forEach(function (date) {
-                                            if (!uniqueDates.includes(date)) {
-                                                uniqueDates.push(date);
-                                            }
-                                        });
-                                    });
-
-                                    // Hide the "Booked Members" link for all .fc-day elements
-                                    $('.fc-day').find('.view-bookings-button').hide();
-
-                                    // Show the "Booked Members" link only for uniqueDates
-                                    uniqueDates.forEach(function (date) {
-                                        $('.fc-day[data-date="' + date + '"]').find('.view-bookings-button').show();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: 'Bookings',
-                                        text: 'Sorry, No Bookings for this user.',
-                                        icon: 'info',
-                                        confirmButtonText: 'OK'
-                                    });
-                                }
-                            },
-                            error: function (xhr, status, error) {
-                                console.error(xhr.responseText);
-                            }
-                        });
-                    }
+                     // Reuse the search logic
+                     $('#button-addon2').click();
                 });
-
-
-
-
 
                 $('#button-addon2').click(function () {
                     var searchValue = $('#user-search-input').val();
@@ -1303,34 +1169,25 @@ var endDate = dateRange[1] ? new Date(dateRange[1]) : new Date(startDate); // Us
                             type: 'POST',
                             url: ajaxurl,
                             data: waitlistData,
+                            dataType: 'json',
                             success: function (response) {
                                 console.log(response);
 
-
-
-                                if (response != 0) {
-                                    var bookings = response.split('}{');
-                                    if (bookings.length > 1) {
-                                        bookings[0] += '}';
-                                        for (var i = 1; i < bookings.length - 1; i++) {
-                                            bookings[i] = '{' + bookings[i] + '}';
-                                        }
-                                        bookings[bookings.length - 1] = '{' + bookings[bookings.length - 1];
-                                    }
-
+                                if (response != 0 && response.length > 0) {
                                     var uniqueDates = [];
-                                    var hasSetMember = false; // Flag to check if member has been set
 
-                                    bookings.forEach(function (booking) {
-                                        var bookingDetails = JSON.parse(booking);
-                                        console.log(bookingDetails.member)
-                                        if (!hasSetMember) {
+                                    // Response is now an array of JSON objects (booking_details)
+                                    response.forEach(function (bookingJson) {
+                                        var bookingDetails = typeof bookingJson === 'string' ? JSON.parse(bookingJson) : bookingJson;
+                                        
+                                        if (!$('#hidden_name').val()) {
                                             $('#hidden_name').val(bookingDetails.member);
-                                            hasSetMember = true; // Update the flag
                                         }
 
-                                        var datePicker = bookingDetails.datePicker.split(',');
-                                        datePicker.forEach(function (date) {
+                                        var datePickerStr = bookingDetails.datePicker;
+                                        var dates = datePickerStr.split(',');
+                                        
+                                        dates.forEach(function (date) {
                                             if (!uniqueDates.includes(date)) {
                                                 uniqueDates.push(date);
                                             }
@@ -1414,7 +1271,10 @@ function fetch_bookings_callback()
 
     $search_value = sanitize_text_field($_POST['search_value']);
 
-    // Fetch user ID from the users table based on user_login
+    // Fetch user ID from the users table based on user_login or display_name
+    // Trying exact match on user_login first, then like match on display name if needed, but the original code used user_login.
+    // The previous code used user_login = %s. The frontend autocomplete suggests user_login.
+    
     $user_id = $wpdb->get_var(
         $wpdb->prepare(
             "SELECT ID FROM {$wpdb->users} WHERE user_login = %s",
@@ -1424,23 +1284,42 @@ function fetch_bookings_callback()
 
 
     if ($user_id) {
-        // Fetch bookings where user_id matches $user_id
+        // Fetch bookings where the MEMBER in booking_details matches $user_id
+        // We use JSON_UNQUOTE(JSON_EXTRACT(booking_details, '$.member')) = $user_id
+        
+        $table_name = $wpdb->prefix . 'booking_data';
+        //Now it give only approved booking on callender
         $bookings = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM wp_booking_data WHERE user_id = %d",
+                "SELECT * FROM $table_name 
+                 WHERE JSON_UNQUOTE(JSON_EXTRACT(booking_details, '$.member')) = %d
+                 AND JSON_UNQUOTE(JSON_EXTRACT(booking_details, '$.status')) = '1'",
                 $user_id
             )
         );
+        // $bookings = $wpdb->get_results(
+        //     $wpdb->prepare(
+        //         "SELECT * FROM $table_name 
+        //          WHERE JSON_UNQUOTE(JSON_EXTRACT(booking_details, '$.member')) = %d",
+        //         $user_id
+        //     )
+        // );
 
         if ($bookings) {
+            $response_data = array();
             foreach ($bookings as $booking) {
-                print_r($booking->booking_details);
+                // Decode the JSON to ensure it's valid, then add to response
+                $details = json_decode($booking->booking_details, true);
+                if ($details) {
+                     $response_data[] = $booking->booking_details;
+                }
             }
+             echo json_encode($response_data);
         } else {
-            return false;
+             echo '0'; 
         }
     } else {
-        echo '<div>No user found</div>';
+        echo '0';
     }
 
     wp_die();
