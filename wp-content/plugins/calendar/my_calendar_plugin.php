@@ -707,6 +707,29 @@ function my_calendar_shortcode($atts)
                     <hr>
                     <div class="modal-body pt-0 booking">
                         <div class="container">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <?php
+                                        $hunt_start = get_option('hunt_season_start_date');
+                                        $hunt_end = get_option('hunt_season_end_date');
+                                        $booking_open = get_option('hunt_season_booking_open_date');
+
+                                        if ($hunt_start && $booking_open) {
+                                            $formatted_start = date('F j, Y', strtotime($hunt_start));
+                                            $formatted_open = date('F j, Y', strtotime($booking_open));
+                                            $formatted_end = $hunt_end ? date('F j, Y', strtotime($hunt_end)) : 'No specific date';
+                                            
+                                            echo "<strong>Hunt Season Start Date:</strong> $formatted_start <br>";
+                                            echo "<strong>Hunt Season End Date:</strong> $formatted_end <br>";
+                                            echo "<strong>Booking Opens:</strong> $formatted_open";
+                                        } else {
+                                            echo "<strong>Note:</strong> There is no upcoming hunt season at this time.";
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-md-6 border">
                                     <table class="table">
@@ -745,17 +768,18 @@ function my_calendar_shortcode($atts)
 
 
 
-                                                    <span id="member-alert" class="text-danger"></span> <!-- Span for alert -->
+                                                    <span id="member-alert-waitlist" class="text-danger"></span> <!-- Span for alert -->
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>Preferred Date <span class="text-danger">*</span></td>
+                                                <td>Arrival and Departure Date <span class="text-danger">*</span></td>
                                                 <td>
                                                     <div class="arr"> <!-- Ruchit -->
-                                                        <input type="text" class="form-control flatpickr" id="prefered_date">
+                                                        <input type="text" class="form-control flatpickr" id="prefered_date" required>
                                                         <img src="https://icons.veryicon.com/png/o/miscellaneous/administration/calendar-335.png"
                                                             id="calendar_img" alt="">
                                                     </div>
+                                                    <span id="date-picker-alert-waitlist" class="text-danger"></span>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -768,6 +792,7 @@ function my_calendar_shortcode($atts)
                                                         <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
                                                             alt="">
                                                     </div>
+                                                    <span id="number-of-guests-alert-waitlist" class="text-danger"></span>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -775,7 +800,7 @@ function my_calendar_shortcode($atts)
                                                 <td>
                                                     <div class="form-check form-check-inline">
                                                         <input class="form-check-input" type="radio"
-                                                            name="arrivalMethod-waitlist" id="boat" value="Boat" required>
+                                                             name="arrivalMethod-waitlist" id="boat" value="Boat" required>
                                                         <label class="form-check-label" for="boat">Boat</label>
                                                     </div>
                                                     <div class="form-check form-check-inline">
@@ -783,7 +808,7 @@ function my_calendar_shortcode($atts)
                                                             name="arrivalMethod-waitlist" id="self" value="Self" required>
                                                         <label class="form-check-label" for="self">Self</label>
                                                     </div>
-                                                    <span id="arrivalMethod-alert" class="text-danger"></span>
+                                                    <span id="arrivalMethod-alert-waitlist" class="text-danger"></span>
                                                     <!-- Span for alert -->
                                                 </td>
                                             </tr>
@@ -800,11 +825,11 @@ function my_calendar_shortcode($atts)
                                                             id="mixed" value="Mixed" required>
                                                         <label class="form-check-label" for="mixed">Mixed</label>
                                                     </div>
-                                                    <span id="gender-alert" class="text-danger"></span> <!-- Span for alert -->
+                                                    <span id="gender-alert-waitlist" class="text-danger"></span> <!-- Span for alert -->
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>Number of Hunters</td>
+                                                <td>Number of Hunters </td>
                                                 <td>
                                                     <input type="text" class="form-control" id="number-of-waitlist-members"
                                                         pattern="[0-9]*"
@@ -1046,62 +1071,78 @@ function my_calendar_shortcode($atts)
                     var flatpickrInstance = flatpickr("#prefered_date");
                     flatpickrInstance.open();
                 });
+
                 document.getElementById('save-waitlist').addEventListener('click', function () {
-                    // Retrieve form data
+                    this.disabled = true;
+
                     var member = document.querySelector('#member-select-waitlist').value;
-                    var numberOfHunters = document.querySelector('#number-of-guests-waitlist').value;
                     var prefered_date = document.querySelector('#prefered_date').value;
+                    var numberOfGuests = document.querySelector('#number-of-guests-waitlist').value;
+                    var arrivalMethod = document.querySelector('input[name="arrivalMethod-waitlist"]:checked');
+                    var gender = document.querySelector('input[name="gender-waitlist"]:checked');
+                    var numberOfHunters = document.querySelector('#number-of-waitlist-members').value;
+                    var breed = document.querySelector('#breed-waitlist').value;
+                    var dogGender = document.querySelector('input[name="dogGender-waitlist"]:checked');
+                    var bringDog = document.querySelector('input[name="bringDog-waitlist"]:checked');
+                    var preferredHunt = document.querySelector('#preferred-hunt-waitlist').value;
+                    var specialInstructions = document.querySelector('#special-instructions-waitlist').value;
 
-                    // Retrieve optional form data
-                    var arrivalMethodElement = document.querySelector('input[name="arrivalMethod-waitlist"]:checked');
-                    var genderElement = document.querySelector('input[name="gender-waitlist"]:checked');
-                    var numberOfGuestsElement = document.querySelector('#number-of-waitlist-members');
+                    var emptyFields = [];
+                    if (member === '') emptyFields.push('Member');
+                    if (prefered_date === '') emptyFields.push('Preferred Date');
+                    if (numberOfGuests === '') emptyFields.push('Number of Guests');
+                    if (!arrivalMethod) emptyFields.push('Arrival Method');
+                    if (!gender) emptyFields.push('Gender');
 
-                    // Validate required fields
-                    if (!member || !numberOfHunters || !prefered_date || !arrivalMethodElement || !genderElement || !numberOfGuestsElement) {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Please fill in all required fields.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                        return; // Exit function if validation fails
+                    // Extract start and end date from the range
+                    var dateRange = prefered_date.split(' to ');
+                    var startDate = new Date(dateRange[0]);
+                    var endDate = dateRange[1] ? new Date(dateRange[1]) : new Date(startDate);
+
+                    // Check if any part of the range falls between September and December
+                    var requiresExtraFields = false;
+                    for (var d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                        var month = d.getMonth(); // 0-based
+                        if (month >= 8 && month <= 11) {
+                            requiresExtraFields = true;
+                            break;
+                        }
                     }
 
-                    // Extract values if elements exist
-                    var arrivalMethod = arrivalMethodElement.value;
-                    var gender = genderElement.value;
-                    var numberOfGuests = numberOfGuestsElement.value;
+                    if (requiresExtraFields) {
+                        if (!bringDog) emptyFields.push('Bring Dog');
+                        if (breed === '') emptyFields.push('Breed');
+                        if (!dogGender || dogGender.value === '') emptyFields.push('Dog Gender');
+                        if (numberOfHunters === '') emptyFields.push('Number of Hunters');
+                        if (preferredHunt === '' || preferredHunt === 'No Preference') emptyFields.push('Preferred Hunt');
+                        if (specialInstructions === '') emptyFields.push('Special Instructions');
+                    }
 
-                    // Retrieve optional form data
-                    var breedElement = document.querySelector('#breed-waitlist');
-                    var dogGenderElement = document.querySelector('input[name="dogGender-waitlist"]:checked');
-                    var bringDogElement = document.querySelector('input[name="bringDog-waitlist"]:checked');
-                    var preferredHuntElement = document.querySelector('#preferred-hunt-waitlist');
-                    var specialInstructionsElement = document.querySelector('#special-instructions-waitlist');
+                    if (emptyFields.length > 0) {
+                        Swal.fire({
+                            title: 'Empty Fields',
+                            html: 'Please fill the following fields before submitting:<br>' + emptyFields.join('<br>'),
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+                        this.disabled = false;
+                        return;
+                    }
 
-                    // Extract values if elements exist
-                    var breed = breedElement ? breedElement.value : '';
-                    var dogGender = dogGenderElement ? dogGenderElement.value : '';
-                    var bringDog = bringDogElement ? bringDogElement.value : '';
-                    var preferredHunt = preferredHuntElement ? preferredHuntElement.value : '';
-                    var specialInstructions = specialInstructionsElement ? specialInstructionsElement.value : '';
-
-                    // Construct waitlistData object
                     var waitlistData = {
                         'member': member,
-                        'numberOfHunters': numberOfHunters,
                         'prefered_date': prefered_date,
-                        'arrivalMethod': arrivalMethod,
-                        'gender': gender,
                         'numberOfGuests': numberOfGuests,
-                        'breed': breed,
-                        'dogGender': dogGender,
-                        'bringDog': bringDog,
-                        'preferredHunt': preferredHunt,
-                        'specialInstructions': specialInstructions
+                        'arrivalMethod': arrivalMethod.value,
+                        'gender': gender.value,
+                        'numberOfHunters': numberOfHunters
                     };
 
+                    if (breed !== '') waitlistData['breed'] = breed;
+                    if (dogGender) waitlistData['dogGender'] = dogGender.value;
+                    if (bringDog) waitlistData['bringDog'] = bringDog.value;
+                    if (preferredHunt !== '') waitlistData['preferredHunt'] = preferredHunt;
+                    if (specialInstructions !== '') waitlistData['specialInstructions'] = specialInstructions;
 
                     var nonce = '<?php echo wp_create_nonce("save-waitlist-data"); ?>';
 
@@ -1125,15 +1166,13 @@ function my_calendar_shortcode($atts)
                         },
                         error: function (error) {
                             console.error(error);
+                            document.getElementById('save-waitlist').disabled = false;
                         },
                         complete: function () {
-                            // Re-enable the button after completion (whether success or error)
                             document.getElementById('save-waitlist').disabled = false;
                         }
                     });
                 });
-
-
                 document.getElementById('save-booking').addEventListener('click', function () {
     this.disabled = true;
 
@@ -1273,23 +1312,15 @@ var endDate = dateRange[1] ? new Date(dateRange[1]) : new Date(startDate); // Us
 
                 $('#clear-button').click(function () {
                     $('#user-search-input').val('');
-
                     $('#hidden_name').val('');
-
                     $('.view-bookings-button').show();
+                    
+                    // Restore original events and view
+                    calendar.removeAllEvents();
+                    calendar.addEventSource(JSON.parse($('#defaultEventsField').val()));
+                    calendar.changeView(getInitialView());
                 });
 
-                // Function to handle the click event for the next button
-                $('.fc-next-button').click(function () {
-                    // Reuse the search logic
-                    $('#button-addon2').click();
-                });
-
-                // Function to handle the click event for the previous button
-                $('.fc-prev-button').click(function () {
-                     // Reuse the search logic
-                     $('#button-addon2').click();
-                });
 
                 $('#button-addon2').click(function () {
                     var searchValue = $('#user-search-input').val();
@@ -1310,8 +1341,8 @@ var endDate = dateRange[1] ? new Date(dateRange[1]) : new Date(startDate); // Us
 
                                 if (response != 0 && response.length > 0) {
                                     var uniqueDates = [];
+                                    calendar.removeAllEvents();
 
-                                    // Response is now an array of JSON objects (booking_details)
                                     response.forEach(function (bookingJson) {
                                         var bookingDetails = typeof bookingJson === 'string' ? JSON.parse(bookingJson) : bookingJson;
                                         
@@ -1320,22 +1351,60 @@ var endDate = dateRange[1] ? new Date(dateRange[1]) : new Date(startDate); // Us
                                         }
 
                                         var datePickerStr = bookingDetails.datePicker;
-                                        var dates = datePickerStr.split(',');
+                                        var rawDatesArr = datePickerStr.split(',');
                                         
-                                        dates.forEach(function (date) {
-                                            if (!uniqueDates.includes(date)) {
-                                                uniqueDates.push(date);
+                                        rawDatesArr.forEach(function(rawDate) {
+                                            if (rawDate.includes(' to ')) {
+                                                var parts = rawDate.split(' to ');
+                                                if (parts.length === 2) {
+                                                    var start = new Date(parts[0]);
+                                                    var end = new Date(parts[1]);
+                                                    for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                                                        var formatted = d.toISOString().split('T')[0];
+                                                        if (!uniqueDates.includes(formatted)) {
+                                                            uniqueDates.push(formatted);
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                var formatted = rawDate.trim();
+                                                if (!uniqueDates.includes(formatted)) {
+                                                    uniqueDates.push(formatted);
+                                                }
                                             }
                                         });
                                     });
 
-                                    // Hide the "Booked Members" link for all .fc-day elements
-                                    $('.fc-day').find('.view-bookings-button').hide();
-
-                                    // Show the "Booked Members" link only for uniqueDates
                                     uniqueDates.forEach(function (date) {
-                                        $('.fc-day[data-date="' + date + '"]').find('.view-bookings-button').show();
+                                        calendar.addEvent({
+                                            title: 'Booking found (Click to view)',
+                                            start: date,
+                                            allDay: true,
+                                            extendedProps: { isSearchResult: true },
+                                            backgroundColor: '#28a745',
+                                            borderColor: '#28a745',
+                                            display: 'block' // Ensure it appears clearly in list view
+                                        });
                                     });
+
+                                    // Add a style to ensure cursor pointer in list view for these events
+                                    var style = document.createElement('style');
+                                    style.innerHTML = '.fc-list-event { cursor: pointer !important; }';
+                                    document.head.appendChild(style);
+
+                                    calendar.setOption('eventClick', function(info) {
+                                        if (info.event.extendedProps.isSearchResult) {
+                                            viewBookings({ dateStr: info.event.startStr });
+                                        } else {
+                                            // Handle default event click (usually eventModalInfo)
+                                            if (typeof eventModalInfo === 'function') {
+                                                eventModalInfo(info);
+                                            }
+                                        }
+                                    });
+
+                                    calendar.changeView('listYear');
+
                                 } else {
                                     Swal.fire({
                                         title: 'Bookings',
@@ -1405,11 +1474,9 @@ function fetch_bookings_callback()
     global $wpdb;
 
     $search_value = sanitize_text_field($_POST['search_value']);
+    $current_user_id = get_current_user_id();
 
-    // Fetch user ID from the users table based on user_login or display_name
-    // Trying exact match on user_login first, then like match on display name if needed, but the original code used user_login.
-    // The previous code used user_login = %s. The frontend autocomplete suggests user_login.
-    
+    // Fetch user ID from the users table based on user_login
     $user_id = $wpdb->get_var(
         $wpdb->prepare(
             "SELECT ID FROM {$wpdb->users} WHERE user_login = %s",
@@ -1417,10 +1484,16 @@ function fetch_bookings_callback()
         )
     );
 
+    // Security Check: Non-admins can ONLY fetch their own bookings
+    if (!current_user_can('manage_options')) {
+         if ($user_id != $current_user_id) {
+             echo '0';
+             wp_die();
+         }
+    }
 
     if ($user_id) {
         // Fetch bookings where the MEMBER in booking_details matches $user_id
-        // We use JSON_UNQUOTE(JSON_EXTRACT(booking_details, '$.member')) = $user_id
         
         $table_name = $wpdb->prefix . 'booking_data';
         //Now it give only approved booking on callender
@@ -1432,13 +1505,6 @@ function fetch_bookings_callback()
                 $user_id
             )
         );
-        // $bookings = $wpdb->get_results(
-        //     $wpdb->prepare(
-        //         "SELECT * FROM $table_name 
-        //          WHERE JSON_UNQUOTE(JSON_EXTRACT(booking_details, '$.member')) = %d",
-        //         $user_id
-        //     )
-        // );
 
         if ($bookings) {
             $response_data = array();
@@ -1490,16 +1556,21 @@ add_action('wp_ajax_nopriv_user_autosuggest', 'user_autosuggest_callback');
 
 function user_autosuggest_callback()
 {
-    global $wpdb;
-
     $search_value = sanitize_text_field($_POST['search_value']);
+    $current_user_id = get_current_user_id();
 
-    $users = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT * FROM {$wpdb->users} WHERE display_name LIKE %s LIMIT 5",
-            '%' . $wpdb->esc_like($search_value) . '%'
-        )
+    $args = array(
+        'search'         => '*' . $search_value . '*',
+        'search_columns' => array( 'display_name', 'user_login' ),
+        'number'         => 10,
     );
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        // Club Members see ONLY themselves
+        $args['include'] = array( $current_user_id );
+    }
+
+    $users = get_users( $args );
 
     if ($users) {
         foreach ($users as $user) {
